@@ -22,7 +22,7 @@
                      (parse col new-i (concat acc [n])))
          (= ")" c) [acc (inc i)]
          :else (parse col (inc i) (concat acc [(process-token c)]))))
-     (first acc))))
+     (first acc)))) ;;TODO Make use of first unnecessary
 
 (defn process-token
   [s]
@@ -55,23 +55,3 @@
               [f (get env (first x))
                args (map #(my-eval % env) (rest x))]
             (apply f args))))
-
-(parse (tokenise "(cons 1 2)"))
-(my-eval ["add" 1 2] my-env)
-(my-eval ["if" "true" 1 2] my-env)
-(my-eval ["add" ["add" 1 2] 3] my-env)
-(my-eval ["define" "hello" 2] my-env)
-(my-eval (parse (tokenise "(add (add 1 2) 3)")) my-env)
-(tokenise "(add (add 1 2) 3)")
-(parse (tokenise "(add (add 1 2) 3)"))
-(my-eval (parse (tokenise "(add (add 1 2) 3)")) my-env)
-(parse ["(" ")"])
-(parse ["(" "a" ")"])
-(parse ["(" "a" "(" "b" "(" "c" ")" ")" ")"])
-(parse ["(" "a" "b" "(" "c" "d" ")" "e" ")"])
-(my-eval (parse ["(" "a" "b" "(" "c" "d" ")" "e" ")"]) my-env)
-
-(is (= ["a" "b"] (tokenise "a b")))
-(is (= ["(" "a" "b" "c" ")"] (tokenise "(a b c)")))
-
-

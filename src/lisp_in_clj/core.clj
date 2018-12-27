@@ -30,8 +30,7 @@
          :else (parse col (inc i) (concat acc [(process-token c)]))))
      (first acc)))) ;;TODO Make use of first unnecessary
 
-
-(def my-env
+(def ^:dynamic my-env
   {"add" #(+ %1 %2)
    "sub" #(- %1 %2)
    "car" #(first %) ;;TODO Fix
@@ -51,8 +50,17 @@
                  (if (my-eval pred my-env)
                    (my-eval conseq my-env)
                    (my-eval alt my-env)))
-    (= "define" (first x)) (assoc my-env (second x) (nth x 2))
+    (keyword? x) (get env x)
+    ;;TODO Make define update the passed-in environment, or make it global
+    (= "define" (first x)) (def env (assoc env (keyword (second x)) (nth x 2)))
     :else (let
               [f (get env (first x))
                args (map #(my-eval % env) (rest x))]
             (apply f args))))
+
+(defn repl
+  []
+  (with-local-vars [s (read-line)]
+    (while (not= "quit" (var-get s))
+      (println (my-eval (parse (tokenise (var-get s))) my-env))
+      (var-set s (read-line)))))

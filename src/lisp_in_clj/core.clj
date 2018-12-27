@@ -21,45 +21,57 @@
          (= "(" c) (let [[n new-i] (parse col (inc i) (empty []))]
                      (parse col new-i (concat acc [n])))
          (= ")" c) [acc (inc i)]
-         :else (parse col (inc i) (concat acc [c]))))
-     acc)))
+         :else (parse col (inc i) (concat acc [(process-token c)]))))
+     (first acc))))
+
+(defn process-token
+  [s]
+  (if (number? (read-string s))
+    (read-string s)
+    s))
 
 (def my-env
-  {:add #(+ %1 %2)
-   :sub #(- %1 %2)})
+  {"add" #(+ %1 %2)
+   "sub" #(- %1 %2)
+   "car" #(first %) ;;TODO Fix
+   "cdr" #(rest %) ;;TODO Fix
+   "cons" #(conj %1 %2) ;;TODO Fix
+   })
 
 (defn my-eval
   ;; Takes a parsed vector.
   [x env]
   (cond
     (number? x) x
-    (string? x) (get env x) ;; Symbol
-    ;;TODO Conditional
-    ;;TODO Definition
+    (= "true" x) true
+    (= "if" (first x)) (let [pred (second x)
+                        conseq (nth x 2)
+                        alt (nth x 3)]
+                 (if (my-eval pred my-env)
+                   (my-eval conseq my-env)
+                   (my-eval alt my-env)))
+    (= "define" (first x)) (assoc my-env (second x) (nth x 2))
     :else (let
-              [f (get env (keyword (first x)))
+              [f (get env (first x))
                args (map #(my-eval % env) (rest x))]
             (apply f args))))
 
+(parse (tokenise "(cons 1 2)"))
 (my-eval ["add" 1 2] my-env)
+(my-eval ["if" "true" 1 2] my-env)
 (my-eval ["add" ["add" 1 2] 3] my-env)
+(my-eval ["define" "hello" 2] my-env)
+(my-eval (parse (tokenise "(add (add 1 2) 3)")) my-env)
+(tokenise "(add (add 1 2) 3)")
+(parse (tokenise "(add (add 1 2) 3)"))
+(my-eval (parse (tokenise "(add (add 1 2) 3)")) my-env)
+(parse ["(" ")"])
 (parse ["(" "a" ")"])
-(parse ["(" 1 ")"])
 (parse ["(" "a" "(" "b" "(" "c" ")" ")" ")"])
 (parse ["(" "a" "b" "(" "c" "d" ")" "e" ")"])
+(my-eval (parse ["(" "a" "b" "(" "c" "d" ")" "e" ")"]) my-env)
 
-(concat 
- (concat (empty ["a"]) ["b"]) ["c"])
-
-(conj ["a" "b"] ["c"])
 (is (= ["a" "b"] (tokenise "a b")))
 (is (= ["(" "a" "b" "c" ")"] (tokenise "(a b c)")))
 
-(defn if-let-check
-  [x]
-  (if-let [y (nth (range 3) x)]
-    y
-    "oh no"))
 
-(if-let-check 1)
-(if-let-check 10000)

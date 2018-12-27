@@ -9,6 +9,12 @@
       (clojure.string/replace ")" " )")
       (clojure.string/split #" ")))
 
+(defn process-token
+  [s]
+  (if (number? (read-string s))
+    (read-string s)
+    s))
+
 (defn parse
   ;; Takes a vector of tokens.
   ;; Example:
@@ -24,11 +30,6 @@
          :else (parse col (inc i) (concat acc [(process-token c)]))))
      (first acc)))) ;;TODO Make use of first unnecessary
 
-(defn process-token
-  [s]
-  (if (number? (read-string s))
-    (read-string s)
-    s))
 
 (def my-env
   {"add" #(+ %1 %2)

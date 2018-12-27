@@ -27,6 +27,7 @@
 (def my-env
   {:add #(+ %1 %2)
    :sub #(- %1 %2)})
+
 (defn my-eval
   ;; Takes a parsed vector.
   [x env]
@@ -36,12 +37,12 @@
     ;;TODO Conditional
     ;;TODO Definition
     :else (let
-              [f (first x)
-               args (rest x)]
-            (apply f args))
-    ))
+              [f (get env (keyword (first x)))
+               args (map #(my-eval % env) (rest x))]
+            (apply f args))))
 
-(my-eval ["add" 1 2])
+(my-eval ["add" 1 2] my-env)
+(my-eval ["add" ["add" 1 2] 3] my-env)
 (parse ["(" "a" ")"])
 (parse ["(" 1 ")"])
 (parse ["(" "a" "(" "b" "(" "c" ")" ")" ")"])

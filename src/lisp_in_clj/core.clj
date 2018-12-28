@@ -51,6 +51,7 @@
                    (my-eval conseq @env)
                    (my-eval alt @env)))
     (string? x) (get @env x)
+    (= "quote" (first x)) (second x)
     (= "define" (first x)) (swap! env #(assoc % (second x) (nth x 2)))
     :else (let
               [f (get @env (first x))

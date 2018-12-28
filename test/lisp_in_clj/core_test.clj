@@ -11,6 +11,11 @@
     (is (= '("add" ("add" 1 2) 3)
            (parse ["(" "add" "(" "add" "1" "2" ")" "3" ")"])))))
 
+(deftest test-my-eval-number
+  (testing "Test parse number"
+    (is (= (my-eval 1 my-env)
+           1))))
+
 (deftest test-my-eval
   (testing "Test my-eval"
     (is (= (my-eval ["add" 1 2] my-env)
@@ -21,7 +26,4 @@
     (is (= (my-eval ["if" "true" 1 2] my-env)
            1))))
 
-(deftest test-my-eval-define
-  (testing "Test my-eval define"
-    (is (= (get (my-eval ["define" "hello" 2] my-env) "hello")
-           2))))
+

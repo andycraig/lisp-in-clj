@@ -30,13 +30,13 @@
          :else (parse col (inc i) (concat acc [(process-token c)]))))
      (first acc)))) ;;TODO Make use of first unnecessary
 
-(def ^:dynamic my-env
-  {"add" #(+ %1 %2)
-   "sub" #(- %1 %2)
-   "car" #(first %) ;;TODO Fix
-   "cdr" #(rest %) ;;TODO Fix
-   "cons" #(conj %1 %2) ;;TODO Fix
-   })
+(def my-env
+  (atom {"add" #(+ %1 %2)
+         "sub" #(- %1 %2)
+         "car" #(first %)  ;;TODO Fix
+         "cdr" #(rest %)   ;;TODO Fix
+         "cons" #(conj %1 %2) ;;TODO Fix
+         }))
 
 (defn my-eval
   ;; Takes a parsed vector.
@@ -47,20 +47,22 @@
     (= "if" (first x)) (let [pred (second x)
                         conseq (nth x 2)
                         alt (nth x 3)]
-                 (if (my-eval pred my-env)
-                   (my-eval conseq my-env)
-                   (my-eval alt my-env)))
-    (keyword? x) (get env x)
-    ;;TODO Make define update the passed-in environment, or make it global
-    (= "define" (first x)) (def env (assoc env (keyword (second x)) (nth x 2)))
+                 (if (my-eval pred @env)
+                   (my-eval conseq @env)
+                   (my-eval alt @env)))
+    (string? x) (get @env x)
+    (= "define" (first x)) (swap! env #(assoc % (second x) (nth x 2)))
     :else (let
-              [f (get env (first x))
+              [f (get @env (first x))
                args (map #(my-eval % env) (rest x))]
             (apply f args))))
 
 (defn repl
-  []
-  (with-local-vars [s (read-line)]
-    (while (not= "quit" (var-get s))
-      (println (my-eval (parse (tokenise (var-get s))) my-env))
-      (var-set s (read-line)))))
+  [env]
+  (let [s (read-line)]
+    (if (= "quit" s)
+      (println "Goodbye!")
+      (let [result (my-eval (parse (tokenise s)) env)]
+        (do
+          (println result)
+          (recur env))))))

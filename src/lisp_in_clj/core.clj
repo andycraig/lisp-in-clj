@@ -52,11 +52,21 @@
                    (my-eval alt @env)))
     (string? x) (get @env x)
     (= "quote" (first x)) (second x)
-    (= "define" (first x)) (swap! env #(assoc % (second x) (nth x 2)))
+(= "lambda" (first x)) (make-lambda (second x) (nth x 2) env)
+    (= "define" (first x)) (swap! env #(assoc % (second x) (my-eval (nth x 2) env)))
     :else (let
+              ;; TODO f should be my-eval'd as well
               [f (get @env (first x))
                args (map #(my-eval % env) (rest x))]
             (apply f args))))
+
+(defn make-lambda
+  [arg-names body env]
+  (fn
+    [& call-time-args]
+    [body arg-names  call-time-args]
+    (let [arg-pairs (interleave arg-names call-time-args)]
+      (my-eval body (atom (apply assoc (cons @env arg-pairs)))))))
 
 (defn repl
   [env]

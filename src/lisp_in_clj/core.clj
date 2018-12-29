@@ -56,8 +56,8 @@
                    (my-eval alt env)))
     (string? x) (get @env x)
     (= "quote" (first x)) (second x)
-(= "lambda" (first x)) (make-lambda (second x) (nth x 2) env)
-(= "define" (first x)) ((constantly nil) (swap! env #(assoc % (second x) (my-eval (nth x 2) env))))
+    (= "lambda" (first x)) (make-lambda (second x) (nth x 2) env)
+    (= "define" (first x)) ((constantly nil) (swap! env #(assoc % (second x) (my-eval (nth x 2) env))))
     :else (let
               ;; TODO f should be my-eval'd as well
               [f (get @env (first x))

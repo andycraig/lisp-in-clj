@@ -13,17 +13,16 @@
 
 (deftest test-my-eval-number
   (testing "Test parse number"
-    (is (= (my-eval 1 my-env)
+    (is (= (my-eval 1 (atom my-env))
            1))))
 
 (deftest test-my-eval
   (testing "Test my-eval"
-    (is (= (my-eval ["add" 1 2] my-env)
+    (is (= (my-eval ["add" 1 2] (atom my-env))
            3))))
 
 (deftest test-my-eval-if
   (testing "Test my-eval if"
-    (is (= (my-eval ["if" "true" 1 2] my-env)
+    (is (= (my-eval ["if" ["eq" 3 3] 1 2] (atom my-env))
            1))))
-
 

@@ -48,20 +48,21 @@
   [x env]
   (cond
     (number? x) x
-    (= "if" (first x)) (let [pred (second x)
-                        conseq (nth x 2)
-                        alt (nth x 3)]
-                 (if (my-eval pred env)
-                   (my-eval conseq env)
-                   (my-eval alt env)))
+    (= "if" (first x)) (let [pred   (second x)
+                             conseq (nth x 2)
+                             alt    (nth x 3)]
+                         (if (my-eval pred env)
+                           (my-eval conseq env)
+                           (my-eval alt env)))
     (string? x) (get @env x)
     (= "quote" (first x)) (second x)
     (= "lambda" (first x)) (make-lambda (second x) (nth x 2) env)
     (= "define" (first x)) ((constantly nil) (swap! env #(assoc % (second x) (my-eval (nth x 2) env))))
     :else (let
-              ;; TODO f should be my-eval'd as well
-              [f (get @env (first x))
-               args (map #(my-eval % env) (rest x))]
+           [f    (if (string? (first x)) 
+                   (get @env (first x))
+                   (my-eval (first x) env))
+            args (map #(my-eval % env) (rest x))]
             (apply f args))))
 
 (defn repl

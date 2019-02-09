@@ -26,3 +26,8 @@
     (is (= (my-eval ["if" ["eq" 3 3] 1 2] (atom my-env))
            1))))
 
+(deftest test-my-eval-fn
+  (testing "Test my-eval of function"
+    (let [exp [["lambda" ["x" "y"] ["add" "x" "y"]] 1 2]]
+      (is (= (my-eval exp (atom my-env))
+             3)))))
